@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>上長評価ダッシュボード 操作マニュアル</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --ink:#18160f;--ink2:#5c574e;--ink3:#9c9589;
+  --bg:#f5f4f1;--surf:#fff;--surf2:#f0eee9;--surf3:#e6e3dd;
+  --bdr:rgba(0,0,0,.08);--bdr2:rgba(0,0,0,.14);
+  --blue:#1a5fd4;--blue-l:#e8effc;
+  --green:#167a40;--green-l:#e3f5eb;
+  --red:#c41b1b;--red-l:#fde8e8;
+  --amber:#a85f00;--amber-l:#fef3dc;
+  --teal:#0e7490;--teal-l:#e0f4f8;
+  --purple:#5b21b6;--purple-l:#ede9fe;
+  --r:8px;
+}
+body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--ink);font-size:14px;line-height:1.7}
+
+/* ─── LAYOUT ─── */
+.wrap{max-width:960px;margin:0 auto;padding:40px 24px 80px}
+
+/* ─── COVER ─── */
+.cover{background:var(--ink);color:#fff;border-radius:16px;padding:48px 40px 40px;margin-bottom:40px;position:relative;overflow:hidden}
+.cover::before{content:'';position:absolute;right:-60px;top:-60px;width:300px;height:300px;border-radius:50%;background:rgba(255,255,255,.04)}
+.cover::after{content:'';position:absolute;right:40px;bottom:-40px;width:180px;height:180px;border-radius:50%;background:rgba(255,255,255,.03)}
+.cover-badge{display:inline-block;background:rgba(255,255,255,.12);color:rgba(255,255,255,.7);font-size:11px;font-weight:500;padding:4px 12px;border-radius:20px;margin-bottom:16px;letter-spacing:.05em}
+.cover h1{font-size:28px;font-weight:700;margin-bottom:8px;line-height:1.3}
+.cover p{color:rgba(255,255,255,.6);font-size:13px}
+.cover-meta{margin-top:24px;display:flex;gap:24px;font-size:12px;color:rgba(255,255,255,.45)}
+
+/* ─── TOC ─── */
+.toc{background:var(--surf);border:0.5px solid var(--bdr2);border-radius:var(--r);padding:20px 24px;margin-bottom:36px}
+.toc-title{font-size:12px;font-weight:600;color:var(--ink3);letter-spacing:.06em;text-transform:uppercase;margin-bottom:14px}
+.toc-list{display:grid;grid-template-columns:1fr 1fr;gap:4px}
+.toc-item{display:flex;align-items:center;gap:8px;padding:5px 8px;border-radius:5px;text-decoration:none;color:var(--ink2);font-size:13px;transition:all .15s}
+.toc-item:hover{background:var(--surf2);color:var(--ink)}
+.toc-num{font-family:'DM Mono',monospace;font-size:11px;color:var(--ink3);min-width:20px}
+
+/* ─── SECTION ─── */
+.section{margin-bottom:48px}
+.section-header{display:flex;align-items:center;gap:12px;margin-bottom:20px;padding-bottom:12px;border-bottom:1.5px solid var(--ink)}
+.section-num{font-family:'DM Mono',monospace;font-size:11px;color:var(--ink3)}
+.section-title{font-size:18px;font-weight:700;color:var(--ink)}
+.section-icon{font-size:20px}
+
+/* ─── MOCK SCREEN ─── */
+.screen{background:var(--surf);border:0.5px solid var(--bdr2);border-radius:10px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,.08);margin-bottom:16px}
+.screen-bar{background:#e8e6e1;padding:8px 14px;display:flex;align-items:center;gap:6px}
+.screen-dot{width:10px;height:10px;border-radius:50%}
+.screen-body{display:flex;min-height:240px}
+
+/* ─── MOCK SIDEBAR ─── */
+.mock-sb{width:140px;flex-shrink:0;background:#f8f7f4;border-right:0.5px solid var(--bdr2);padding:12px 8px;font-size:11px}
+.mock-sb-logo{font-size:10px;font-weight:700;color:var(--ink);margin-bottom:10px;padding:0 4px}
+.mock-sb-label{font-size:9px;color:var(--ink3);letter-spacing:.06em;margin:8px 4px 4px;text-transform:uppercase}
+.mock-nav{display:flex;align-items:center;gap:5px;padding:5px 7px;border-radius:5px;color:var(--ink2);margin-bottom:1px;cursor:default;font-size:10px}
+.mock-nav.active{background:var(--blue-l);color:var(--blue);font-weight:600}
+.mock-nav-dot{width:6px;height:6px;border-radius:2px;background:currentColor;opacity:.5;flex-shrink:0}
+.mock-dept{margin:6px 4px 2px;font-size:9px;font-weight:600;color:var(--ink3)}
+.mock-person{display:flex;align-items:center;gap:4px;padding:3px 5px;border-radius:4px;margin-bottom:2px}
+.mock-person.active{background:var(--blue-l)}
+.mock-av{width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:#fff;flex-shrink:0}
+.mock-person-name{font-size:9px;color:var(--ink2)}
+
+/* ─── MOCK CONTENT ─── */
+.mock-content{flex:1;padding:14px;overflow:hidden}
+.mock-topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;padding-bottom:8px;border-bottom:0.5px solid var(--bdr)}
+.mock-title{font-size:12px;font-weight:700;color:var(--ink)}
+.mock-sub{font-size:9px;color:var(--ink3)}
+.mock-btn{background:var(--blue);color:#fff;font-size:9px;padding:3px 8px;border-radius:4px;display:inline-block}
+.mock-metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px}
+.mock-metric{background:var(--surf2);border-radius:5px;padding:7px 8px;text-align:center}
+.mock-metric-label{font-size:8px;color:var(--ink3);margin-bottom:2px}
+.mock-metric-num{font-family:'DM Mono',monospace;font-size:15px;font-weight:700}
+.mock-metric-num.up{color:var(--green)}
+.mock-metric-num.down{color:var(--red)}
+.mock-metric-num.blue{color:var(--blue)}
+.mock-card{background:var(--surf2);border-radius:5px;padding:8px 10px;margin-bottom:6px}
+.mock-card-title{font-size:9px;font-weight:600;color:var(--ink3);margin-bottom:6px}
+.mock-rank-row{display:flex;align-items:center;gap:5px;padding:3px 0;border-bottom:0.5px solid var(--bdr);font-size:9px}
+.mock-rank-av{width:14px;height:14px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:6px;font-weight:700;color:#fff}
+.mock-rank-name{flex:1;color:var(--ink2)}
+.mock-rank-score{font-family:'DM Mono',monospace;font-weight:700;font-size:10px}
+.mock-grid2{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.mock-grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
+
+/* ─── CHART MOCK ─── */
+.mock-chart{height:60px;display:flex;align-items:flex-end;gap:3px;padding:0 4px}
+.mock-bar{border-radius:2px 2px 0 0;min-width:12px}
+.mock-line{height:40px;position:relative;margin-bottom:6px}
+.mock-line svg{width:100%;height:100%}
+
+/* ─── RADAR MOCK ─── */
+.mock-radar{width:80px;height:80px;margin:0 auto}
+
+/* ─── CALLOUT ─── */
+.callout{display:flex;gap:10px;padding:12px 14px;border-radius:var(--r);margin-bottom:12px;font-size:12px;line-height:1.6}
+.callout.info{background:var(--blue-l);border-left:3px solid var(--blue)}
+.callout.tip{background:var(--green-l);border-left:3px solid var(--green)}
+.callout.warn{background:var(--amber-l);border-left:3px solid var(--amber)}
+.callout-icon{font-size:16px;flex-shrink:0;line-height:1.4}
+.callout b{font-weight:600}
+
+/* ─── STEP LIST ─── */
+.steps{counter-reset:step;margin-bottom:16px}
+.step{display:flex;gap:14px;margin-bottom:12px;position:relative}
+.step-num{width:28px;height:28px;border-radius:50%;background:var(--ink);color:#fff;font-family:'DM Mono',monospace;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.step-body{flex:1;padding-top:4px}
+.step-title{font-weight:600;font-size:13px;margin-bottom:2px}
+.step-desc{font-size:12px;color:var(--ink2);line-height:1.6}
+
+/* ─── BADGE / TAG ─── */
+.tag{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:500}
+.tag.blue{background:var(--blue-l);color:var(--blue)}
+.tag.green{background:var(--green-l);color:var(--green)}
+.tag.red{background:var(--red-l);color:var(--red)}
+.tag.amber{background:var(--amber-l);color:var(--amber)}
+.tag.teal{background:var(--teal-l);color:var(--teal)}
+.tag.purple{background:var(--purple-l);color:var(--purple)}
+
+/* ─── FEATURE TABLE ─── */
+.ftable{width:100%;border-collapse:collapse;margin-bottom:16px;font-size:12px}
+.ftable th{background:var(--ink);color:#fff;padding:8px 12px;text-align:left;font-weight:600;font-size:11px}
+.ftable td{padding:8px 12px;border-bottom:0.5px solid var(--bdr);vertical-align:top;line-height:1.6}
+.ftable tr:last-child td{border:none}
+.ftable tr:nth-child(even) td{background:var(--surf2)}
+
+/* ─── ANNOTATION ─── */
+.anno-wrap{position:relative;margin-bottom:20px}
+.anno{position:absolute;display:flex;align-items:flex-start;gap:6px}
+.anno-bubble{background:var(--ink);color:#fff;font-size:10px;padding:4px 9px;border-radius:5px;white-space:nowrap;line-height:1.5;font-weight:500}
+.anno-line{width:1px;background:var(--ink);opacity:.4}
+.anno-dot{width:8px;height:8px;border-radius:50%;background:var(--red);border:2px solid #fff;box-shadow:0 0 0 1.5px var(--red);flex-shrink:0;margin-top:4px}
+
+/* ─── SCORE INDICATOR ─── */
+.score-bar{height:6px;border-radius:3px;background:var(--surf3);overflow:hidden;margin-top:3px}
+.score-fill{height:100%;border-radius:3px}
+
+/* ─── MISC ─── */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+.three-col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:16px}
+.card-simple{background:var(--surf);border:0.5px solid var(--bdr2);border-radius:var(--r);padding:16px}
+.card-simple h4{font-size:13px;font-weight:600;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.card-simple p{font-size:12px;color:var(--ink2);line-height:1.6}
+.divider{height:0.5px;background:var(--bdr2);margin:32px 0}
+.page-break{margin:40px 0}
+.label-row{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.label-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.label-text{font-size:11px;color:var(--ink2)}
+kbd{background:var(--surf3);border:0.5px solid var(--bdr2);border-radius:4px;padding:1px 6px;font-family:'DM Mono',monospace;font-size:11px}
+
+@media print{
+  body{background:#fff}
+  .wrap{padding:20px}
+  .section{page-break-inside:avoid}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- ══════════════════════════════════
+     COVER
+══════════════════════════════════ -->
+<div class="cover">
+  <div class="cover-badge">OPERATION MANUAL</div>
+  <h1>上長評価ダッシュボード<br>操作マニュアル</h1>
+  <p>HR Analytics System — 使い方と画面の見方</p>
+  <div class="cover-meta">
+    <span>全7画面対応</span>
+    <span>CSV取込対応</span>
+    <span>Firestore自動保存</span>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     TOC
+══════════════════════════════════ -->
+<div class="toc">
+  <div class="toc-title">目次</div>
+  <div class="toc-list">
+    <a href="#s1" class="toc-item"><span class="toc-num">01</span>画面の基本構成</a>
+    <a href="#s2" class="toc-item"><span class="toc-num">02</span>はじめてのセットアップ</a>
+    <a href="#s3" class="toc-item"><span class="toc-num">03</span>全体ダッシュボード</a>
+    <a href="#s4" class="toc-item"><span class="toc-num">04</span>データ入力（CSVインポート）</a>
+    <a href="#s5" class="toc-item"><span class="toc-num">05</span>個人概要・コメント分析</a>
+    <a href="#s6" class="toc-item"><span class="toc-num">06</span>メンバー比較・部署比較</a>
+    <a href="#s7" class="toc-item"><span class="toc-num">07</span>インサイト分析</a>
+    <a href="#s8" class="toc-item"><span class="toc-num">08</span>スコアの見方・色の意味</a>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     01 基本構成
+══════════════════════════════════ -->
+<div class="section" id="s1">
+  <div class="section-header">
+    <span class="section-num">01</span>
+    <span class="section-icon">🖥️</span>
+    <span class="section-title">画面の基本構成</span>
+  </div>
+
+  <div class="screen">
+    <div class="screen-bar">
+      <div class="screen-dot" style="background:#ff5f57"></div>
+      <div class="screen-dot" style="background:#ffbd2e"></div>
+      <div class="screen-dot" style="background:#28c840"></div>
+      <span style="font-size:10px;color:#888;margin-left:8px">上長評価ダッシュボード</span>
+    </div>
+    <div class="screen-body">
+      <!-- サイドバー -->
+      <div class="mock-sb">
+        <div class="mock-sb-logo">上長評価 Dashboard</div>
+        <div class="mock-sb-label">メニュー</div>
+        <div class="mock-nav active"><span class="mock-nav-dot"></span>全体ダッシュボード</div>
+        <div class="mock-nav"><span class="mock-nav-dot"></span>個人概要</div>
+        <div class="mock-nav"><span class="mock-nav-dot"></span>コメント分析</div>
+        <div class="mock-nav"><span class="mock-nav-dot"></span>メンバー比較</div>
+        <div class="mock-nav"><span class="mock-nav-dot"></span>インサイト分析</div>
+        <div class="mock-nav"><span class="mock-nav-dot"></span>未来予測</div>
+        <div class="mock-nav"><span class="mock-nav-dot"></span>データ入力</div>
+        <div class="mock-sb-label">評価対象者</div>
+        <div class="mock-dept">▼ 営業部</div>
+        <div class="mock-person active">
+          <div class="mock-av" style="background:#1a5fd4">木</div>
+          <div class="mock-person-name">木村 優作</div>
+        </div>
+        <div class="mock-person">
+          <div class="mock-av" style="background:#167a40">山</div>
+          <div class="mock-person-name">山下 由希子</div>
+        </div>
+        <div class="mock-dept">▼ 制作部</div>
+        <div class="mock-person">
+          <div class="mock-av" style="background:#a85f00">森</div>
+          <div class="mock-person-name">森岡 浩生</div>
+        </div>
+      </div>
+      <!-- コンテンツ -->
+      <div class="mock-content">
+        <div class="mock-topbar">
+          <div><div class="mock-title">全体ダッシュボード</div><div class="mock-sub">全評価者のサマリー</div></div>
+          <div style="display:flex;gap:5px;align-items:center">
+            <div style="font-size:9px;background:var(--surf2);border:0.5px solid var(--bdr2);border-radius:4px;padding:3px 7px;color:var(--ink2)">木村 優作 ▼</div>
+            <div class="mock-btn">↓ CSV出力</div>
+          </div>
+        </div>
+        <div class="mock-metrics">
+          <div class="mock-metric"><div class="mock-metric-label">全員平均</div><div class="mock-metric-num up">4.1</div></div>
+          <div class="mock-metric"><div class="mock-metric-label">4点以上</div><div class="mock-metric-num blue">3</div></div>
+          <div class="mock-metric"><div class="mock-metric-label">4点未満</div><div class="mock-metric-num down">1</div></div>
+          <div class="mock-metric"><div class="mock-metric-label">満足度</div><div class="mock-metric-num up">72%</div></div>
+        </div>
+        <div class="mock-grid2">
+          <div class="mock-card"><div class="mock-card-title">🏆 評価スコア（最新月）</div>
+            <div class="mock-rank-row"><span>🥇</span><div class="mock-rank-av" style="background:#1a5fd4">木</div><span class="mock-rank-name">木村 優作</span><span class="mock-rank-score" style="color:var(--green)">4.4</span></div>
+            <div class="mock-rank-row"><span>🥈</span><div class="mock-rank-av" style="background:#167a40">山</div><span class="mock-rank-name">山下 由希子</span><span class="mock-rank-score" style="color:var(--green)">4.1</span></div>
+            <div class="mock-rank-row"><span>🥉</span><div class="mock-rank-av" style="background:#a85f00">森</div><span class="mock-rank-name">森岡 浩生</span><span class="mock-rank-score" style="color:var(--amber)">3.8</span></div>
+          </div>
+          <div class="mock-card"><div class="mock-card-title">😊 コメント満足度（最新月）</div>
+            <div class="mock-rank-row"><span>🥇</span><div class="mock-rank-av" style="background:#167a40">山</div><span class="mock-rank-name">山下 由希子</span><span class="mock-rank-score" style="color:var(--green)">82%</span></div>
+            <div class="mock-rank-row"><span>🥈</span><div class="mock-rank-av" style="background:#1a5fd4">木</div><span class="mock-rank-name">木村 優作</span><span class="mock-rank-score" style="color:var(--green)">75%</span></div>
+            <div class="mock-rank-row"><span>🥉</span><div class="mock-rank-av" style="background:#a85f00">森</div><span class="mock-rank-name">森岡 浩生</span><span class="mock-rank-score" style="color:var(--amber)">60%</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="three-col">
+    <div class="card-simple">
+      <h4>🗂️ サイドバー（左）</h4>
+      <p>メニュー切替と評価対象者の一覧。部署ごとにアコーディオン表示。名前をクリックすると詳細モーダルが開きます。</p>
+    </div>
+    <div class="card-simple">
+      <h4>📋 メインコンテンツ（中央）</h4>
+      <p>選択したメニューの内容が表示されます。右上のプルダウンで表示する評価対象者を切り替えられます。</p>
+    </div>
+    <div class="card-simple">
+      <h4>↓ CSV出力（右上）</h4>
+      <p>現在選択中の評価者の全データをCSV形式でダウンロードできます。</p>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     02 セットアップ
+══════════════════════════════════ -->
+<div class="section" id="s2">
+  <div class="section-header">
+    <span class="section-num">02</span>
+    <span class="section-icon">🚀</span>
+    <span class="section-title">はじめてのセットアップ</span>
+  </div>
+
+  <div class="callout info">
+    <span class="callout-icon">💡</span>
+    <div>データはFirestore（クラウド）に自動保存されます。一度登録すればリロード後も消えません。</div>
+  </div>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <div class="step-title">部署を追加する</div>
+        <div class="step-desc">サイドバー下部の <kbd>＋ 部署を追加</kbd> をクリック → 部署名を入力して「追加」</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <div class="step-title">評価対象者を追加する</div>
+        <div class="step-desc">サイドバー下部の <kbd>＋ 対象者を追加</kbd> をクリック → 氏名・役職・所属部署を入力して「追加する」</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <div class="step-title">データを入力する</div>
+        <div class="step-desc">メニューから「データ入力」を選択 → CSVインポートまたは手動入力でスコア・コメントを登録</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-body">
+        <div class="step-title">分析する</div>
+        <div class="step-desc">全体ダッシュボード・個人概要・インサイト分析などでデータを確認</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="two-col">
+    <div class="card-simple">
+      <h4>🏢 部署管理</h4>
+      <p style="margin-bottom:8px">部署名にカーソルを合わせると操作ボタンが表示されます。</p>
+      <div style="background:var(--surf2);border-radius:5px;padding:8px 10px;font-size:11px">
+        <div style="display:flex;align-items:center;gap:6px;padding:4px 6px;background:var(--surf);border-radius:4px;margin-bottom:4px">
+          <span style="color:var(--ink3);font-size:10px">▶</span>
+          <span style="flex:1;font-weight:600;font-size:10px">営業部</span>
+          <span style="color:#888;font-size:10px">3</span>
+          <span style="color:var(--blue);font-size:10px">✎</span>
+          <span style="color:var(--red);font-size:10px">×</span>
+        </div>
+        <div style="font-size:9px;color:var(--ink3);padding:0 6px">✎ = 部署名を編集　× = 削除（メンバーは未分類へ）</div>
+      </div>
+    </div>
+    <div class="card-simple">
+      <h4>↕️ ドラッグ&ドロップで部署移動</h4>
+      <p style="margin-bottom:8px">人物の行にカーソルを合わせると <strong>⠿</strong> グリップが表示されます。ドラッグして別の部署にドロップするだけで移動できます。</p>
+      <div style="background:var(--blue-l);border-radius:5px;padding:7px 10px;font-size:11px;color:var(--blue)">
+        ⠿ アイコンをつかんで → 別の部署エリアにドロップ
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     03 全体ダッシュボード
+══════════════════════════════════ -->
+<div class="section" id="s3">
+  <div class="section-header">
+    <span class="section-num">03</span>
+    <span class="section-icon">🏠</span>
+    <span class="section-title">全体ダッシュボード</span>
+  </div>
+
+  <p style="font-size:13px;color:var(--ink2);margin-bottom:16px">全評価者のデータをまとめて確認できるトップ画面です。メニューの「全体ダッシュボード」をクリックして表示します。</p>
+
+  <table class="ftable">
+    <tr><th>エリア</th><th>内容</th><th>活用場面</th></tr>
+    <tr>
+      <td><span class="tag blue">上部メトリクス</span></td>
+      <td>全員の平均スコア・4点以上/未満の人数・コメント満足度</td>
+      <td>組織全体の状態を一目で把握</td>
+    </tr>
+    <tr>
+      <td><span class="tag green">評価スコアランキング</span></td>
+      <td>最新月と全期間累計平均の2種類のランキング</td>
+      <td>継続的に高評価な人を特定</td>
+    </tr>
+    <tr>
+      <td><span class="tag teal">コメント満足度ランキング</span></td>
+      <td>ポジティブコメント率の高い順ランキング（最新月・累計）</td>
+      <td>現場満足度の高いマネージャーを確認</td>
+    </tr>
+    <tr>
+      <td><span class="tag amber">4点未満アラート</span></td>
+      <td>カテゴリー別に4点未満のスコアを一覧表示</td>
+      <td>改善が必要な項目を素早く発見</td>
+    </tr>
+    <tr>
+      <td><span class="tag red">上昇率・下落率</span></td>
+      <td>前月比で最もスコアが上がった人・下がった人</td>
+      <td>急激な変化をキャッチ</td>
+    </tr>
+    <tr>
+      <td><span class="tag purple">カテゴリー別グラフ</span></td>
+      <td>5カテゴリーの全員比較棒グラフ・全員の推移グラフ</td>
+      <td>カテゴリーごとの強み・弱みを比較</td>
+    </tr>
+  </table>
+
+  <div class="callout tip">
+    <span class="callout-icon">✅</span>
+    <div><b>ランキングは2種類あります。</b>「最新月」は直近の評価のみ、「全期間累計平均」は全月のデータを平均したもの。1ヶ月だけ良かった人より、継続して高い評価を維持している人が上位になります。</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     04 データ入力
+══════════════════════════════════ -->
+<div class="section" id="s4">
+  <div class="section-header">
+    <span class="section-num">04</span>
+    <span class="section-icon">📥</span>
+    <span class="section-title">データ入力（CSVインポート）</span>
+  </div>
+
+  <div class="two-col" style="margin-bottom:16px">
+    <div>
+      <p style="font-size:13px;color:var(--ink2);margin-bottom:12px">Googleフォームの回答をスプレッドシートからCSVでダウンロードし、ドロップするだけで自動集計できます。</p>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <div class="step-title">サイドバーで対象者を選択</div>
+            <div class="step-desc">誰のデータを入力するか選んでから操作します</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <div class="step-title">メニューから「データ入力」を選択</div>
+            <div class="step-desc">画面上部のCSVインポートエリアが表示されます</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <div class="step-title">CSVをドロップ</div>
+            <div class="step-desc">Googleスプレッドシート → ファイル → ダウンロード → CSVを選択してダウンロードしたファイルをドロップ</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">4</div>
+          <div class="step-body">
+            <div class="step-title">対象月を選んで「全件を集計してフォームに取込む」</div>
+            <div class="step-desc">スコアが自動計算されてフォームに入力されます</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">5</div>
+          <div class="step-body">
+            <div class="step-title">「保存する」をクリック</div>
+            <div class="step-desc">右下に「✓ 保存しました」と表示されれば完了</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <!-- CSVインポート画面モック -->
+      <div class="screen">
+        <div class="screen-bar">
+          <div class="screen-dot" style="background:#ff5f57"></div>
+          <div class="screen-dot" style="background:#ffbd2e"></div>
+          <div class="screen-dot" style="background:#28c840"></div>
+        </div>
+        <div style="padding:14px">
+          <div style="font-size:10px;font-weight:700;margin-bottom:10px;color:var(--ink)">📂 スプレッドシートCSVから自動取込</div>
+          <div style="font-size:8px;color:var(--ink3);margin-bottom:8px;line-height:1.6">① Googleスプレッドシートで「ファイル → ダウンロード → CSV」<br>② CSVファイルを下のエリアにドロップ<br>③ 月を選ぶだけで自動入力</div>
+          <div style="border:2px dashed var(--bdr2);border-radius:8px;padding:20px;text-align:center;margin-bottom:10px;background:var(--surf2)">
+            <div style="font-size:20px;margin-bottom:4px">📂</div>
+            <div style="font-size:10px;font-weight:600;color:var(--ink2)">CSVファイルをここにドロップ</div>
+            <div style="font-size:9px;color:var(--ink3)">またはクリックしてファイルを選択</div>
+          </div>
+          <div style="background:var(--green-l);border-radius:5px;padding:6px 10px;font-size:9px;color:var(--green);margin-bottom:8px">✓ 21件の回答を読み込みました</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px">
+            <div style="font-size:9px"><div style="color:var(--ink3);margin-bottom:2px">取込対象月</div><div style="background:var(--surf2);border-radius:4px;padding:4px 8px;font-size:9px">2026-04</div></div>
+          </div>
+          <div style="background:var(--blue);color:#fff;border-radius:5px;padding:6px 10px;font-size:9px;text-align:center">↓ 全件を集計してフォームに取込む</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout warn">
+    <span class="callout-icon">⚠️</span>
+    <div><b>CSVの列構成に注意。</b>このシステムはGoogleフォームの特定の列構成に対応しています。列がずれると集計結果がおかしくなります。C〜E列が業務運営スコア、F列がコメント…という固定構成です。</div>
+  </div>
+
+  <div class="card-simple" style="margin-bottom:12px">
+    <h4>📝 手動で月を編集・削除するには</h4>
+    <p>データ入力画面の下部「入力・編集する月を選択」エリアで、過去に入力した月のボタンをクリックすると編集モードになります。「スコア修正」「この月を削除」が可能です。</p>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     05 個人概要・コメント分析
+══════════════════════════════════ -->
+<div class="section" id="s5">
+  <div class="section-header">
+    <span class="section-num">05</span>
+    <span class="section-icon">👤</span>
+    <span class="section-title">個人概要・コメント分析</span>
+  </div>
+
+  <div class="two-col">
+    <div>
+      <div style="font-size:13px;font-weight:600;margin-bottom:10px">📊 個人概要</div>
+      <p style="font-size:12px;color:var(--ink2);margin-bottom:12px">サイドバーで人物を選択後、「個人概要」タブで確認できます。</p>
+      <table class="ftable">
+        <tr><th>表示内容</th><th>説明</th></tr>
+        <tr><td>メトリクス4つ</td><td>平均スコア・コメント満足度・前月比・データ月数</td></tr>
+        <tr><td>スコア推移グラフ</td><td>全体平均と5カテゴリー別の月次推移</td></tr>
+        <tr><td>カテゴリー別棒グラフ</td><td>5カテゴリーのスコア比較（横棒）</td></tr>
+        <tr><td>コメント感情分布</td><td>カテゴリー別プラス/マイナス/ニュートラル数</td></tr>
+      </table>
+    </div>
+    <div>
+      <div style="font-size:13px;font-weight:600;margin-bottom:10px">💬 コメント分析</div>
+      <p style="font-size:12px;color:var(--ink2);margin-bottom:12px">コメントをカテゴリー・感情・月で絞り込んで一覧表示します。</p>
+      <!-- コメントカードモック -->
+      <div style="background:var(--surf);border:0.5px solid var(--bdr2);border-radius:8px;padding:10px">
+        <div style="display:flex;gap:5px;margin-bottom:6px;flex-wrap:wrap">
+          <span style="background:var(--surf3);border-radius:3px;padding:2px 7px;font-size:9px">すべて</span>
+          <span style="background:var(--green-l);color:var(--green);border-radius:3px;padding:2px 7px;font-size:9px">プラス</span>
+          <span style="background:var(--red-l);color:var(--red);border-radius:3px;padding:2px 7px;font-size:9px">マイナス</span>
+          <span style="background:var(--surf3);border-radius:3px;padding:2px 7px;font-size:9px">ニュートラル</span>
+        </div>
+        <div style="background:var(--green-l);border-left:3px solid var(--green);border-radius:0 5px 5px 0;padding:7px 9px;margin-bottom:5px">
+          <div style="display:flex;gap:5px;margin-bottom:3px"><span style="background:var(--green);color:#fff;font-size:8px;padding:1px 6px;border-radius:3px">プラス</span><span style="font-size:8px;color:var(--ink3)">業務運営</span></div>
+          <div style="font-size:10px;color:var(--ink)">チームをよくまとめており、頼りになる存在です。</div>
+          <div style="display:flex;gap:4px;margin-top:4px">
+            <span style="font-size:9px;cursor:pointer">👍</span>
+            <span style="font-size:9px;cursor:pointer">👎</span>
+            <span style="font-size:9px;cursor:pointer">➖</span>
+          </div>
+        </div>
+        <div style="background:var(--red-l);border-left:3px solid var(--red);border-radius:0 5px 5px 0;padding:7px 9px">
+          <div style="display:flex;gap:5px;margin-bottom:3px"><span style="background:var(--red);color:#fff;font-size:8px;padding:1px 6px;border-radius:3px">マイナス</span><span style="font-size:8px;color:var(--ink3)">制度運用</span></div>
+          <div style="font-size:10px;color:var(--ink)">評価基準がわかりにくいと感じることがある。</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout tip">
+    <span class="callout-icon">👍</span>
+    <div><b>コメントの感情は手動で変更できます。</b>各コメント右側の 👍👎➖ ボタンをクリックすると感情ラベルが切り替わり、自動でクラウドに保存されます。</div>
+  </div>
+
+  <div class="card-simple">
+    <h4>🔍 名前をクリックで詳細モーダル</h4>
+    <p>サイドバーの人物名をクリックすると、その人の<strong>評価スコア推移グラフ・月別スコア一覧・コメント</strong>がモーダルで表示されます。月タブで過去の月を切り替えて確認できます。</p>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     06 メンバー比較・部署比較
+══════════════════════════════════ -->
+<div class="section" id="s6">
+  <div class="section-header">
+    <span class="section-num">06</span>
+    <span class="section-icon">⚖️</span>
+    <span class="section-title">メンバー比較・部署比較</span>
+  </div>
+
+  <p style="font-size:13px;color:var(--ink2);margin-bottom:16px">「メンバー比較」タブは3つのモードで切り替えられます。</p>
+
+  <div class="screen" style="margin-bottom:16px">
+    <div class="screen-bar">
+      <div class="screen-dot" style="background:#ff5f57"></div>
+      <div class="screen-dot" style="background:#ffbd2e"></div>
+      <div class="screen-dot" style="background:#28c840"></div>
+    </div>
+    <div style="padding:14px">
+      <!-- モードタブ -->
+      <div style="display:flex;gap:0;border-bottom:1px solid var(--bdr2);margin-bottom:12px">
+        <div style="padding:6px 14px;border-bottom:2px solid var(--blue);color:var(--blue);font-size:10px;font-weight:600">👤 メンバー比較</div>
+        <div style="padding:6px 14px;color:var(--ink3);font-size:10px">🏢 部署内比較</div>
+        <div style="padding:6px 14px;color:var(--ink3);font-size:10px">📊 部署間比較</div>
+      </div>
+      <div style="font-size:9px;color:var(--ink3);margin-bottom:8px">比較するメンバーを選択</div>
+      <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:10px">
+        <div style="background:var(--blue-l);border:0.5px solid var(--blue);border-radius:4px;padding:3px 8px;font-size:9px;color:var(--blue)">✓ 木村 優作</div>
+        <div style="background:var(--green-l);border:0.5px solid var(--green);border-radius:4px;padding:3px 8px;font-size:9px;color:var(--green)">✓ 山下 由希子</div>
+        <div style="background:var(--surf2);border:0.5px solid var(--bdr2);border-radius:4px;padding:3px 8px;font-size:9px;color:var(--ink3)">森岡 浩生</div>
+      </div>
+      <!-- レーダーとカードのモック -->
+      <div style="display:grid;grid-template-columns:120px 1fr 1fr;gap:10px">
+        <div style="background:var(--surf2);border-radius:5px;display:flex;align-items:center;justify-content:center;padding:10px">
+          <svg width="90" height="90" viewBox="0 0 100 100">
+            <polygon points="50,10 85,30 85,70 50,90 15,70 15,30" fill="none" stroke="#e0ddd6" stroke-width="1"/>
+            <polygon points="50,25 72,37 72,63 50,75 28,63 28,37" fill="none" stroke="#e0ddd6" stroke-width="1"/>
+            <polygon points="50,40 64,47 64,56 50,62 36,56 36,47" fill="none" stroke="#e0ddd6" stroke-width="1"/>
+            <polygon points="50,15 78,35 74,68 50,84 26,68 22,35" fill="rgba(26,95,212,.2)" stroke="#1a5fd4" stroke-width="1.5"/>
+            <polygon points="50,20 74,38 71,65 50,80 29,65 26,38" fill="rgba(22,122,64,.15)" stroke="#167a40" stroke-width="1.5" stroke-dasharray="3,2"/>
+          </svg>
+        </div>
+        <div style="background:var(--surf2);border-radius:5px;padding:8px">
+          <div style="font-size:9px;font-weight:600;color:var(--ink3);margin-bottom:5px">木村 優作</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:5px">
+            <div style="background:var(--surf);border-radius:3px;padding:4px;text-align:center"><div style="font-size:7px;color:var(--ink3)">平均スコア</div><div style="font-family:monospace;font-size:14px;font-weight:700;color:var(--green)">4.4</div></div>
+            <div style="background:var(--surf);border-radius:3px;padding:4px;text-align:center"><div style="font-size:7px;color:var(--ink3)">満足度</div><div style="font-family:monospace;font-size:14px;font-weight:700;color:var(--green)">75%</div></div>
+          </div>
+          <div style="font-size:8px;border-top:0.5px solid var(--bdr);padding-top:4px"><span style="color:var(--ink3)">💪 強み</span> <span style="color:var(--green)">公平性・信頼性 4.7</span></div>
+          <div style="font-size:8px"><span style="color:var(--ink3)">📌 改善点</span> <span style="color:var(--red)">制度運用・改善 3.8</span></div>
+        </div>
+        <div style="background:var(--surf2);border-radius:5px;padding:8px">
+          <div style="font-size:9px;font-weight:600;color:var(--ink3);margin-bottom:5px">山下 由希子</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:5px">
+            <div style="background:var(--surf);border-radius:3px;padding:4px;text-align:center"><div style="font-size:7px;color:var(--ink3)">平均スコア</div><div style="font-family:monospace;font-size:14px;font-weight:700;color:var(--green)">4.1</div></div>
+            <div style="background:var(--surf);border-radius:3px;padding:4px;text-align:center"><div style="font-size:7px;color:var(--ink3)">満足度</div><div style="font-family:monospace;font-size:14px;font-weight:700;color:var(--green)">82%</div></div>
+          </div>
+          <div style="font-size:8px;border-top:0.5px solid var(--bdr);padding-top:4px"><span style="color:var(--ink3)">💪 強み</span> <span style="color:var(--green)">コミュニケーション 4.5</span></div>
+          <div style="font-size:8px"><span style="color:var(--ink3)">📌 改善点</span> <span style="color:var(--red)">業務運営 3.7</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="three-col">
+    <div class="card-simple">
+      <h4>👤 メンバー比較</h4>
+      <p>チェックボックスで比較したい人を選択。レーダーチャート・推移グラフ・強み改善点カードで並べて比較します。</p>
+    </div>
+    <div class="card-simple">
+      <h4>🏢 部署内比較</h4>
+      <p>部署を選ぶとその部署のメンバー全員を自動で比較。レーダー・推移・満足度推移・メンバーカードが表示されます。</p>
+    </div>
+    <div class="card-simple">
+      <h4>📊 部署間比較</h4>
+      <p>全部署の平均スコアをカテゴリー別棒グラフで比較。推移グラフ・満足度推移・部署サマリーカードを表示します。</p>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     07 インサイト分析
+══════════════════════════════════ -->
+<div class="section" id="s7">
+  <div class="section-header">
+    <span class="section-num">07</span>
+    <span class="section-icon">💡</span>
+    <span class="section-title">インサイト分析</span>
+  </div>
+
+  <p style="font-size:13px;color:var(--ink2);margin-bottom:16px">サイドバーで人物を選択後、「インサイト分析」タブで確認。全期間のデータから傾向と課題を分析します。</p>
+
+  <table class="ftable">
+    <tr><th>コンテンツ</th><th>内容</th></tr>
+    <tr><td><span class="tag blue">メトリクス</span></td><td>最新平均スコア・データ期間・全期間トレンド（▲▼）・コメント満足度</td></tr>
+    <tr><td><span class="tag teal">カテゴリー別推移</span></td><td>5カテゴリーの月次推移を折れ線グラフで表示。どのカテゴリーが伸びている/落ちているか確認</td></tr>
+    <tr><td><span class="tag amber">月次変化量</span></td><td>前月比の変化量を棒グラフで表示。緑=上昇、赤=下落</td></tr>
+    <tr><td><span class="tag green">💪 強み・弱み分析</span></td><td>全期間平均で高評価TOP3・低評価WORST3の質問を表示。最強/要改善カテゴリーも明示</td></tr>
+    <tr><td><span class="tag purple">高評価質問 TOP5</span></td><td>全期間を通じて最もスコアが高かった質問の上位5件</td></tr>
+    <tr><td><span class="tag red">低評価質問 WORST5</span></td><td>全期間を通じて最もスコアが低かった質問の下位5件。改善アクションの優先順位付けに活用</td></tr>
+  </table>
+</div>
+
+<!-- ══════════════════════════════════
+     08 スコアの見方
+══════════════════════════════════ -->
+<div class="section" id="s8">
+  <div class="section-header">
+    <span class="section-num">08</span>
+    <span class="section-icon">📈</span>
+    <span class="section-title">スコアの見方・色の意味</span>
+  </div>
+
+  <div class="two-col" style="margin-bottom:20px">
+    <div class="card-simple">
+      <h4>スコアの判定基準（1〜5点）</h4>
+      <div style="margin-top:8px">
+        <div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:0.5px solid var(--bdr)">
+          <span style="font-family:monospace;font-size:16px;font-weight:700;color:var(--green);min-width:30px">4.0+</span>
+          <div><div style="font-size:12px;font-weight:500">良好</div><div style="font-size:11px;color:var(--ink3)">目標水準。維持・さらなる向上を</div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:0.5px solid var(--bdr)">
+          <span style="font-family:monospace;font-size:16px;font-weight:700;color:var(--amber);min-width:30px">3.5〜</span>
+          <div><div style="font-size:12px;font-weight:500">やや課題</div><div style="font-size:11px;color:var(--ink3)">改善の余地あり。注意して観察</div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;padding:6px 0">
+          <span style="font-family:monospace;font-size:16px;font-weight:700;color:var(--red);min-width:30px">〜3.5</span>
+          <div><div style="font-size:12px;font-weight:500">要改善</div><div style="font-size:11px;color:var(--ink3)">優先的にフォローが必要</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="card-simple">
+      <h4>コメント満足度（ポジティブ率）</h4>
+      <div style="margin-top:8px">
+        <div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:0.5px solid var(--bdr)">
+          <span style="font-family:monospace;font-size:16px;font-weight:700;color:var(--green);min-width:40px">70%+</span>
+          <div style="font-size:12px">良好。プラスコメントが多い状態</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:0.5px solid var(--bdr)">
+          <span style="font-family:monospace;font-size:16px;font-weight:700;color:var(--amber);min-width:40px">50〜70</span>
+          <div style="font-size:12px">普通。プラス・マイナスが混在</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;padding:6px 0">
+          <span style="font-family:monospace;font-size:16px;font-weight:700;color:var(--red);min-width:40px">〜50%</span>
+          <div style="font-size:12px">要注意。マイナスコメントが多い</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card-simple" style="margin-bottom:12px">
+    <h4>📊 5カテゴリーの説明</h4>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px">
+      <div style="display:flex;gap:8px;align-items:flex-start">
+        <span class="tag amber">業務運営</span>
+        <span style="font-size:12px;color:var(--ink2)">進行管理・スケジュール・プロセス改善（3項目）</span>
+      </div>
+      <div style="display:flex;gap:8px;align-items:flex-start">
+        <span class="tag green">支援・育成</span>
+        <span style="font-size:12px;color:var(--ink2)">メンバー支援・方針共有・フィードバック・育成（4項目）</span>
+      </div>
+      <div style="display:flex;gap:8px;align-items:flex-start">
+        <span class="tag blue">制度運用・改善</span>
+        <span style="font-size:12px;color:var(--ink2)">評価制度・組織課題への対応（2項目）</span>
+      </div>
+      <div style="display:flex;gap:8px;align-items:flex-start">
+        <span class="tag teal">コミュニケーション</span>
+        <span style="font-size:12px;color:var(--ink2)">人間関係・情報共有・相談しやすさ（3項目）</span>
+      </div>
+      <div style="display:flex;gap:8px;align-items:flex-start">
+        <span class="tag purple">公平性・信頼性</span>
+        <span style="font-size:12px;color:var(--ink2)">公平な対応・判断の納得感・信頼される言動（3項目）</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout info">
+    <span class="callout-icon">ℹ️</span>
+    <div><b>データはリアルタイムで自動保存されます。</b>保存状況は画面右下のステータスバーで確認できます。「✓ 保存しました」と表示されれば完了です。</div>
+  </div>
+</div>
+
+<!-- フッター -->
+<div style="text-align:center;padding:24px 0 8px;color:var(--ink3);font-size:11px;border-top:0.5px solid var(--bdr2)">
+  上長評価ダッシュボード 操作マニュアル　|　GitHub Pages 対応 · Claude AI 搭載
+</div>
+
+</div>
+</body>
+</html>
